@@ -1,46 +1,37 @@
 body {
     background-color: #f4f4f4;
     margin-top: 50px;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Lato';
 }
 
 .item {
-    background-color: #fff;
+    background-color: white;
     padding: 15px;
     margin-bottom: 15px;
-    border: 1px solid #ccc;
+    border: transparent;
     border-radius: 5px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    box-shadow: 0 0 1em #ccc;
+    transition: all .2s ease-in-out;
 }
 
 .item:hover {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 1em #aaa;
 }
 
 .item.completed {
     text-decoration: line-through;
-    color: #777;
+}
+
+.item.incomplete {
+    color: #ff0000; 
 }
 
 .toggles {
-    color: #333;
+    color: black;
 }
 
 .name {
-    flex: 1;
     padding-top: 3px;
-    font-size: 16px;
-    color: #333;
-}
-
-.creation-time {
-    padding: 10px;
-    color: #777;
-    font-size: 14px;
 }
 
 .remove {
