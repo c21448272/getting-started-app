@@ -136,9 +136,6 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
         );
     };
 
-    // Format the creation timestamp
-    const creationTime = new Date(item.creationTimestamp).toLocaleString();
-
     return (
         <div className={`item ${item.completed ? 'completed' : ''}`}>
             <div className="row">
@@ -150,8 +147,8 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                 <div className="col-xs-8 name">
                     {item.name}
                 </div>
-                <div className="col-xs-2 creation-time">
-                    Added: {creationTime}
+                <div className="col-xs-2">
+                    {item.completed ? 'Complete' : 'Incomplete'}
                 </div>
                 <div className="col-xs-1 text-center remove">
                     <button className="btn btn-link" onClick={removeItem} aria-label="Remove Item">
@@ -162,3 +159,5 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
         </div>
     );
 }
+
+ReactDOM.render(<App />, document.getElementById('root'));
