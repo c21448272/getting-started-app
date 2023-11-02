@@ -127,13 +127,33 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
             headers: { 'Content-Type': 'application/json' },
         })
             .then(r => r.json())
-            .then(onItemUpdate);
+            .then(updatedItem => {
+                onItemUpdate(updatedItem);
+                // Update the complete and incomplete counts
+                const completeCount = document.getElementById('complete-count');
+                const incompleteCount = document.getElementById('incomplete-count');
+                if (updatedItem.completed) {
+                    completeCount.textContent = `Complete: ${parseInt(completeCount.textContent.split(': ')[1]) + 1}`;
+                    incompleteCount.textContent = `Incomplete: ${parseInt(incompleteCount.textContent.split(': ')[1]) - 1}`;
+                } else {
+                    completeCount.textContent = `Complete: ${parseInt(completeCount.textContent.split(': ')[1]) - 1}`;
+                    incompleteCount.textContent = `Incomplete: ${parseInt(incompleteCount.textContent.split(': ')[1]) + 1}`;
+                }
+            });
     };
 
     const removeItem = () => {
-        fetch(`/items/${item.id}`, { method: 'DELETE' }).then(() =>
-            onItemRemoval(item),
-        );
+        fetch(`/items/${item.id}`, { method: 'DELETE' }).then(() => {
+            onItemRemoval(item);
+            // Update the appropriate count
+            const completeCount = document.getElementById('complete-count');
+            const incompleteCount = document.getElementById('incomplete-count');
+            if (item.completed) {
+                completeCount.textContent = `Complete: ${parseInt(completeCount.textContent.split(': ')[1]) - 1}`;
+            } else {
+                incompleteCount.textContent = `Incomplete: ${parseInt(incompleteCount.textContent.split(': ')[1]) - 1}`;
+            }
+        });
     };
 
     return (
