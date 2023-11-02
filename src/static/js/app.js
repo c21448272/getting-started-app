@@ -136,44 +136,29 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
         );
     };
 
+    // Format the creation timestamp
+    const creationTime = new Date(item.creationTimestamp).toLocaleString();
+
     return (
-        <Container fluid className={`item ${item.completed && 'completed'}`}>
-            <Row>
-                <Col xs={1} className="text-center">
-                    <Button
-                        className="toggles"
-                        size="sm"
-                        variant="link"
-                        onClick={toggleCompletion}
-                        aria-label={
-                            item.completed
-                                ? 'Mark item as incomplete'
-                                : 'Mark item as complete'
-                        }
-                    >
-                        <i
-                            className={`far ${
-                                item.completed ? 'fa-check-square' : 'fa-square'
-                            }`}
-                        />
-                    </Button>
-                </Col>
-                <Col xs={10} className="name">
+        <div className={`item ${item.completed ? 'completed' : ''}`}>
+            <div className="row">
+                <div className="col-xs-1 text-center">
+                    <button className="toggles btn btn-link" onClick={toggleCompletion} aria-label={item.completed ? 'Mark item as incomplete' : 'Mark item as complete'}>
+                        <i className={`far ${item.completed ? 'fa-check-square' : 'fa-square'}`}></i>
+                    </button>
+                </div>
+                <div className="col-xs-8 name">
                     {item.name}
-                </Col>
-                <Col xs={1} className="text-center remove">
-                    <Button
-                        size="sm"
-                        variant="link"
-                        onClick={removeItem}
-                        aria-label="Remove Item"
-                    >
-                        <i className="fa fa-trash text-danger" />
-                    </Button>
-                </Col>
-            </Row>
-        </Container>
+                </div>
+                <div className="col-xs-2 creation-time">
+                    Added: {creationTime}
+                </div>
+                <div className="col-xs-1 text-center remove">
+                    <button className="btn btn-link" onClick={removeItem} aria-label="Remove Item">
+                        <i className="fa fa-trash text-danger"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
-
-ReactDOM.render(<App />, document.getElementById('root'));
