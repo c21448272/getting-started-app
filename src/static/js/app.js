@@ -13,38 +13,63 @@ function App() {
 
 function TodoListCard() {
     const [items, setItems] = React.useState(null);
+    const [completedItems, setCompletedItems] = React.useState([]);
+    const [incompletedItems, setIncompletedItems] = React.useState([]);
 
     React.useEffect(() => {
         fetch('/items')
             .then(r => r.json())
-            .then(setItems);
+            .then(data => {
+                setItems(data);
+                // Filter and set completed and incompleted items
+                setCompletedItems(data.filter(item => item.completed));
+                setIncompletedItems(data.filter(item => !item.completed));
+            });
     }, []);
 
     const onNewItem = React.useCallback(
         newItem => {
             setItems([...items, newItem]);
+            if (newItem.completed) {
+                setCompletedItems([...completedItems, newItem]);
+            } else {
+                setIncompletedItems([...incompletedItems, newItem]);
+            }
         },
-        [items],
+        [items, completedItems, incompletedItems]
     );
 
     const onItemUpdate = React.useCallback(
-        item => {
-            const index = items.findIndex(i => i.id === item.id);
-            setItems([
-                ...items.slice(0, index),
-                item,
-                ...items.slice(index + 1),
-            ]);
-        },
-        [items],
-    );
+    item => {
+        const updatedItems = [...items];
+        const updatedCompletedItems = [...completedItems];
+        const updatedIncompletedItems = [...incompletedItems];
+        const index = items.findIndex(i => i._id === item._id);
+
+        updatedItems[index] = item;
+
+        if (item.completed) {
+            updatedCompletedItems.push(item);
+            updatedIncompletedItems = incompletedItems.filter(i => i._id !== item._id);
+        } else {
+            updatedIncompletedItems.push(item);
+            updatedCompletedItems = completedItems.filter(i => i._id !== item._id);
+        }
+
+        setItems(updatedItems);
+        setCompletedItems(updatedCompletedItems);
+        setIncompletedItems(updatedIncompletedItems);
+    },
+    [items, completedItems, incompletedItems]
+);
+
 
     const onItemRemoval = React.useCallback(
         item => {
-            const index = items.findIndex(i => i.id === item.id);
-            setItems([...items.slice(0, index), ...items.slice(index + 1)]);
+            // Update the appropriate list without changing completed or incompleted counts
+            setItems(items.filter(i => i.id !== item.id));
         },
-        [items],
+        [items]
     );
 
     if (items === null) return 'Loading...';
@@ -52,132 +77,38 @@ function TodoListCard() {
     return (
         <React.Fragment>
             <AddItemForm onNewItem={onNewItem} />
-            {items.length === 0 && (
+            {incompletedItems.length === 0 && completedItems.length === 0 && (
                 <p className="text-center">No items yet! Add one above!</p>
             )}
-            {items.map(item => (
-                <ItemDisplay
-                    item={item}
-                    key={item.id}
-                    onItemUpdate={onItemUpdate}
-                    onItemRemoval={onItemRemoval}
-                />
-            ))}
+            {incompletedItems.length > 0 && (
+                <div>
+                    <h2>Incomplete Items</h2>
+                    {incompletedItems.map(item => (
+                        <ItemDisplay
+                            item={item}
+                            key={item.id}
+                            onItemUpdate={onItemUpdate}
+                            onItemRemoval={onItemRemoval}
+                        />
+                    )}
+                </div>
+            )}
+            {completedItems.length > 0 && (
+                <div>
+                    <h2>Completed Items</h2>
+                    {completedItems.map(item => (
+                        <ItemDisplay
+                            item={item}
+                            key={item.id}
+                            onItemUpdate={onItemUpdate}
+                            onItemRemoval={onItemRemoval}
+                        />
+                    )}
+                </div>
+            )}
         </React.Fragment>
     );
 }
 
-function AddItemForm({ onNewItem }) {
-    const { Form, InputGroup, Button } = ReactBootstrap;
-
-    const [newItem, setNewItem] = React.useState('');
-    const [submitting, setSubmitting] = React.useState(false);
-
-    const submitNewItem = e => {
-        e.preventDefault();
-        setSubmitting(true);
-        fetch('/items', {
-            method: 'POST',
-            body: JSON.stringify({ name: newItem }),
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(r => r.json())
-            .then(item => {
-                onNewItem(item);
-                setSubmitting(false);
-                setNewItem('');
-            });
-    };
-
-    return (
-        <Form onSubmit={submitNewItem}>
-            <InputGroup className="mb-3">
-                <Form.Control
-                    value={newItem}
-                    onChange={e => setNewItem(e.target.value)}
-                    type="text"
-                    placeholder="New Item"
-                    aria-describedby="basic-addon1"
-                />
-                <InputGroup.Append>
-                    <Button
-                        type="submit"
-                        variant="success"
-                        disabled={!newItem.length}
-                        className={submitting ? 'disabled' : ''}
-                    >
-                        {submitting ? 'Adding...' : 'Add Item'}
-                    </Button>
-                </InputGroup.Append>
-            </InputGroup>
-        </Form>
-    );
-}
-
-function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
-    const { Container, Row, Col, Button } = ReactBootstrap;
-
-    const toggleCompletion = () => {
-        fetch(`/items/${item.id}`, {
-            method: 'PUT',
-            body: JSON.stringify({
-                name: item.name,
-                completed: !item.completed,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(r => r.json())
-            .then(updatedItem => {
-                onItemUpdate(updatedItem);
-                // Update the complete and incomplete counts
-                const completeCount = document.getElementById('complete-count');
-                const incompleteCount = document.getElementById('incomplete-count');
-                if (updatedItem.completed) {
-                    completeCount.textContent = `Complete: ${parseInt(completeCount.textContent.split(': ')[1]) + 1}`;
-                    incompleteCount.textContent = `Incomplete: ${parseInt(incompleteCount.textContent.split(': ')[1]) - 1}`;
-                } else {
-                    completeCount.textContent = `Complete: ${parseInt(completeCount.textContent.split(': ')[1]) - 1}`;
-                    incompleteCount.textContent = `Incomplete: ${parseInt(incompleteCount.textContent.split(': ')[1]) + 1}`;
-                }
-            });
-    };
-
-    const removeItem = () => {
-        fetch(`/items/${item.id}`, { method: 'DELETE' }).then(() => {
-            onItemRemoval(item);
-            // Update the appropriate count
-            const completeCount = document.getElementById('complete-count');
-            const incompleteCount = document.getElementById('incomplete-count');
-            if (item.completed) {
-                completeCount.textContent = `Complete: ${parseInt(completeCount.textContent.split(': ')[1]) - 1}`;
-            } else {
-                incompleteCount.textContent = `Incomplete: ${parseInt(incompleteCount.textContent.split(': ')[1]) - 1}`;
-            }
-        });
-    };
-
-    return (
-        <div className={`item ${item.completed ? 'completed' : ''}`}>
-            <div className="row">
-                <div className="col-xs-1 text-center">
-                    <button className="toggles btn btn-link" onClick={toggleCompletion} aria-label={item.completed ? 'Mark item as incomplete' : 'Mark item as complete'}>
-                        <i className={`far ${item.completed ? 'fa-check-square' : 'fa-square'}`}></i>
-                    </button>
-                </div>
-                <div className="col-xs-8 name">
-                    {item.name}
-                </div>
-                <div className="col-xs-2">
-                    {item.completed ? 'Complete' : 'Incomplete'}
-                </div>
-                <div className="col-xs-1 text-center remove">
-                    <button className="btn btn-link" onClick={removeItem} aria-label="Remove Item">
-                        <i className="fa fa-trash text-danger"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
 
 ReactDOM.render(<App />, document.getElementById('root'));
