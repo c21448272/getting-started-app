@@ -64,13 +64,21 @@ function TodoListCard() {
 );
 
 
-    const onItemRemoval = React.useCallback(
-        item => {
-            // Update the appropriate list without changing completed or incompleted counts
-            setItems(items.filter(i => i.id !== item.id));
-        },
-        [items]
-    );
+  const onItemRemoval = React.useCallback(
+    item => {
+        // Remove the item from the items list
+        setItems(items.filter(i => i.id !== item.id));
+
+        // Update completedItems and incompletedItems based on the deleted item
+        if (item.completed) {
+            setCompletedItems(completedItems.filter(i => i.id !== item.id));
+        } else {
+            setIncompletedItems(incompletedItems.filter(i => i.id !== item.id));
+        }
+    },
+    [items, completedItems, incompletedItems]
+);
+
 
     if (items === null) return 'Loading...';
 
