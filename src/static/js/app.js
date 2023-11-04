@@ -38,22 +38,22 @@ function TodoListCard() {
         },
         [items, completedItems, incompletedItems]
     );
-
+    
     const onItemUpdate = React.useCallback(
-    item => {
+    (item) => {
         const updatedItems = [...items];
         const updatedCompletedItems = [...completedItems];
         const updatedIncompletedItems = [...incompletedItems];
-        const index = items.findIndex(i => i._id === item._id);
+        const index = items.findIndex((i) => i._id === item._id);
 
         updatedItems[index] = item;
 
         if (item.completed) {
             updatedCompletedItems.push(item);
-            updatedIncompletedItems = incompletedItems.filter(i => i._id !== item._id);
+            updatedIncompletedItems = updatedIncompletedItems.filter((i) => i._id !== item._id);
         } else {
             updatedIncompletedItems.push(item);
-            updatedCompletedItems = completedItems.filter(i => i._id !== item._id);
+            updatedCompletedItems = updatedCompletedItems.filter((i) => i._id !== item._id);
         }
 
         setItems(updatedItems);
@@ -62,9 +62,7 @@ function TodoListCard() {
     },
     [items, completedItems, incompletedItems]
 );
-
-
-  const onItemRemoval = React.useCallback(
+    const onItemRemoval = React.useCallback(
     item => {
         // Remove the item from the items list
         setItems(items.filter(i => i.id !== item.id));
