@@ -22,10 +22,6 @@ body {
     text-decoration: line-through;
 }
 
-.item.incomplete {
-    color: #ff0000;
-}
-
 .toggles {
     color: black;
 }
