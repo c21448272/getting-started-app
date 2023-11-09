@@ -1,80 +1,44 @@
 function App() {
     const { Container, Row, Col } = ReactBootstrap;
-    const [completedCount, setCompletedCount] = React.useState(0);
-    const [incompletedCount, setIncompletedCount] = React.useState(0);
-    const [removedCount, setRemovedCount] = React.useState(0); // Step 1: Initialize removedCount state
+    const [removedCount, setRemovedCount] = React.useState(0);
 
     return (
         <Container>
             <Row>
                 <Col md={{ offset: 3, span: 6 }}>
-                    <TodoListCard
-                        setCompletedCount={setCompletedCount}
-                        setIncompletedCount={setIncompletedCount}
-                        setRemovedCount={setRemovedCount} // Step 2: Pass setRemovedCount to TodoListCard
-                    />
+                    <TodoListCard setRemovedCount={setRemovedCount} />
                 </Col>
             </Row>
             <Row>
                 <Col md={12} className="text-center">
-                    <div>Completed: {completedCount}</div>
-                    <div>Incompleted: {incompletedCount}</div>
-                    // Step 3: Display the removed count
-                    <div>Removed: {removedCount}</div> 
+                    <div>Removed: {removedCount}</div>
                 </Col>
             </Row>
         </Container>
     );
 }
 
-function TodoListCard({ setCompletedCount, setIncompletedCount, setRemovedCount }) {
+function TodoListCard({ setRemovedCount }) {
     const [items, setItems] = React.useState([]);
-
-    React.useEffect(() => {
-        fetch('/items')
-            .then((r) => r.json())
-            .then((data) => {
-                setItems(data);
-                setCompletedCount(data.filter((item) => item.completed).length);
-                setIncompletedCount(data.filter((item) => !item.completed).length);
-            });
-    }, [setCompletedCount, setIncompletedCount]);
-
-    const onNewItem = (newItem) => {
-        setItems([...items, newItem]);
-    };
-
-    const onItemUpdate = React.useCallback(
-        item => {
-            const index = items.findIndex(i => i.id === item.id);
-            setItems([
-                ...items.slice(0, index),
-                item,
-                ...items.slice(index + 1),
-            ]);
-        },
-        [items],
-    );
 
     const onItemRemoval = (item) => {
         const index = items.findIndex((i) => i.id === item.id);
         setItems([...items.slice(0, index), ...items.slice(index + 1)];
-        setRemovedCount((prevCount) => prevCount + 1); // Step 4: Increment the removedCount
+        setRemovedCount((prevCount) => prevCount + 1);
     };
 
     if (items === null) return 'Loading...';
 
     return (
         <React.Fragment>
-            <AddItemForm onNewItem={onNewItem} />
+            <AddItemForm />
             {items.length === 0 && (
                 <p className="text-center">No items yet! Add one above!</p>
             )}
-            {items.map(item => (
+            {items.map((item) => (
                 <ItemDisplay
                     item={item}
                     key={item.id}
-                    onItemUpdate={onItemUpdate}
                     onItemRemoval={onItemRemoval}
                 />
             ))}
@@ -129,21 +93,8 @@ function AddItemForm({ onNewItem }) {
     );
 }
 
-function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
+function ItemDisplay({ item, onItemRemoval }) {
     const { Container, Row, Col, Button } = ReactBootstrap;
-
-    const toggleCompletion = () => {
-        fetch(`/items/${item.id}`, {
-            method: 'PUT',
-            body: JSON.stringify({
-                name: item.name,
-                completed: !item.completed,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(r => r.json())
-            .then(onItemUpdate);
-    };
 
     const removeItem = () => {
         fetch(`/items/${item.id}`, { method: 'DELETE' }).then(() =>
@@ -156,28 +107,6 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
             <Row>
                 <Col xs={1} className="text-center">
                     <Button
-                        className="toggles"
-                        size="sm"
-                        variant="link"
-                        onClick={toggleCompletion}
-                        aria-label={
-                            item.completed
-                                ? 'Mark item as incomplete'
-                                : 'Mark item as complete'
-                        }
-                    >
-                        <i
-                            className={`far ${
-                                item.completed ? 'fa-check-square' : 'fa-square'
-                            }`}
-                        />
-                    </Button>
-                </Col>
-                <Col xs={10} className="name">
-                    {item.name}
-                </Col>
-                <Col xs={1} className="text-center remove">
-                    <Button
                         size="sm"
                         variant="link"
                         onClick={removeItem}
@@ -185,6 +114,9 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                     >
                         <i className="fa fa-trash text-danger" />
                     </Button>
+                </Col>
+                <Col xs={10} className="name">
+                    {item.name}
                 </Col>
             </Row>
         </Container>
