@@ -32,10 +32,8 @@ function TodoListCard({ setCompletedCount, setIncompletedCount }) {
             .then((data) => {
                 setItems(data);
                 // Calculate counts for completed and incompleted tasks
-                const completedTasks = data.filter((item) => item.completed);
-                const incompletedTasks = data.filter((item) => !item.completed);
-                setCompletedCount(completedTasks.length);
-                setIncompletedCount(incompletedTasks.length);
+                setCompletedCount(data.filter((item) => item.completed).length);
+                setIncompletedCount(data.filter((item) => !item.completed).length);
             });
     }, [setCompletedCount, setIncompletedCount]);
 
