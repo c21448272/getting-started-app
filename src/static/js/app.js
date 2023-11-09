@@ -25,7 +25,7 @@ function App() {
 
 function TodoListCard({ setCompletedCount, setIncompletedCount }) {
     const [items, setItems] = React.useState([]);
-    
+
     React.useEffect(() => {
         fetch('/items')
             .then((r) => r.json())
@@ -137,26 +137,30 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
     const { Container, Row, Col, Button } = ReactBootstrap;
 
     const toggleCompletion = () => {
-  fetch(`/items/${item.id}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-      name: item.name,
-      completed: !item.completed,
-    }),
-    headers: { 'Content-Type': 'application/json' },
-  })
-    .then((r) => r.json())
-    .then((updatedItem) => {
-      onItemUpdate(updatedItem);
-        
-      if (updatedItem.completed) {
-        setCompletedCount((count) => count + 1);
-        setIncompletedCount((count) => count - 1);
-      } else {
-        setCompletedCount((count) => count - 1);
-        setIncompletedCount((count) => count + 1);
-      }
-    });
+    const newCompletionStatus = !item.completed;
+
+    fetch(`/items/${item.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            name: item.name,
+            completed: newCompletionStatus,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+    })
+        .then((r) => r.json())
+        .then((updatedItem) => {
+            // Update the completion counts based on the new completion status
+            if (newCompletionStatus) {
+                setCompletedCount((prevCount) => prevCount + 1);
+                setIncompletedCount((prevCount) => prevCount - 1);
+            } else {
+                setIncompletedCount((prevCount) => prevCount + 1);
+                setCompletedCount((prevCount) => prevCount - 1);
+            });
+
+            // Call the onItemUpdate function to update the item in the list
+            onItemUpdate(updatedItem);
+        });
 };
 
     const removeItem = () => {
