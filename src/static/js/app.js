@@ -2,10 +2,6 @@ function App() {
     const { Container, Row, Col } = ReactBootstrap;
     const [completedCount, setCompletedCount] = React.useState(0);
     const [incompletedCount, setIncompletedCount] = React.useState(0);
-function App() {
-    const { Container, Row, Col } = ReactBootstrap;
-    const [completedCount, setCompletedCount] = React.useState(0);
-    const [incompletedCount, setIncompletedCount] = React.useState(0);
 
     return (
         <Container>
