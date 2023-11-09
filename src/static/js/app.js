@@ -137,28 +137,30 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
     const { Container, Row, Col, Button } = ReactBootstrap;
 
     const toggleCompletion = () => {
-      fetch(`/items/${item.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          name: item.name,
-          completed: !item.completed,
-        }),
-        headers: { 'Content-Type': 'application/json' },
-      })
-        .then((r) => r.json())
-        .then((updatedItem) => {
-          onItemUpdate(updatedItem);
+        const newCompletionStatus = !item.completed;
     
-          // Update completion counts here
-          if (updatedItem.completed) {
-            setCompletedCount((count) => count + 1);
-            setIncompletedCount((count) => count - 1);
-          } else {
-            setCompletedCount((count) => count - 1);
-            setIncompletedCount((count) => count + 1);
-          }
-        });
+        fetch(`/items/${item.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                name: item.name,
+                completed: newCompletionStatus,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+            .then((r) => r.json())
+            .then((updatedItem) => {
+                if (newCompletionStatus) {
+                    setCompletedCount((prevCount) => prevCount + 1);
+                    setIncompletedCount((prevCount) => prevCount - 1);
+                } else {
+                    setIncompletedCount((prevCount) => prevCount + 1);
+                    setCompletedCount((prevCount) => prevCount - 1);
+                });
+    
+                onItemUpdate(updatedItem);
+            });
     };
+
 
     const removeItem = () => {
         fetch(`/items/${item.id}`, { method: 'DELETE' }).then(() =>
