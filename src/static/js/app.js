@@ -19,7 +19,8 @@ function App() {
                 <Col md={12} className="text-center">
                     <div>Completed: {completedCount}</div>
                     <div>Incompleted: {incompletedCount}</div>
-                    <div>Removed: {removedCount}</div> {/* Step 3: Display the removed count */}
+                    // Step 3: Display the removed count
+                    <div>Removed: {removedCount}</div> 
                 </Col>
             </Row>
         </Container>
