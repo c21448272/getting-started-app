@@ -2,6 +2,7 @@ function App() {
     const { Container, Row, Col } = ReactBootstrap;
     const [completedCount, setCompletedCount] = React.useState(0);
     const [incompletedCount, setIncompletedCount] = React.useState(0);
+    const [removedCount, setRemovedCount] = React.useState(0); // Step 1: Initialize removedCount state
 
     return (
         <Container>
@@ -10,6 +11,7 @@ function App() {
                     <TodoListCard
                         setCompletedCount={setCompletedCount}
                         setIncompletedCount={setIncompletedCount}
+                        setRemovedCount={setRemovedCount} // Step 2: Pass setRemovedCount to TodoListCard
                     />
                 </Col>
             </Row>
@@ -17,32 +19,29 @@ function App() {
                 <Col md={12} className="text-center">
                     <div>Completed: {completedCount}</div>
                     <div>Incompleted: {incompletedCount}</div>
+                    <div>Removed: {removedCount}</div> {/* Step 3: Display the removed count */}
                 </Col>
             </Row>
         </Container>
     );
 }
 
-function TodoListCard({ setCompletedCount, setIncompletedCount }) {
+function TodoListCard({ setCompletedCount, setIncompletedCount, setRemovedCount }) {
     const [items, setItems] = React.useState([]);
-    
+
     React.useEffect(() => {
         fetch('/items')
             .then((r) => r.json())
             .then((data) => {
                 setItems(data);
-                // Calculate counts for completed and incompleted tasks
                 setCompletedCount(data.filter((item) => item.completed).length);
                 setIncompletedCount(data.filter((item) => !item.completed).length);
             });
     }, [setCompletedCount, setIncompletedCount]);
 
-    const onNewItem = React.useCallback(
-        newItem => {
-            setItems([...items, newItem]);
-        },
-        [items],
-    );
+    const onNewItem = (newItem) => {
+        setItems([...items, newItem]);
+    };
 
     const onItemUpdate = React.useCallback(
         item => {
@@ -56,13 +55,11 @@ function TodoListCard({ setCompletedCount, setIncompletedCount }) {
         [items],
     );
 
-    const onItemRemoval = React.useCallback(
-        item => {
-            const index = items.findIndex(i => i.id === item.id);
-            setItems([...items.slice(0, index), ...items.slice(index + 1)]);
-        },
-        [items],
-    );
+    const onItemRemoval = (item) => {
+        const index = items.findIndex((i) => i.id === item.id);
+        setItems([...items.slice(0, index), ...items.slice(index + 1)];
+        setRemovedCount((prevCount) => prevCount + 1); // Step 4: Increment the removedCount
+    };
 
     if (items === null) return 'Loading...';
 
